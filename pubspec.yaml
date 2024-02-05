@@ -1,0 +1,50 @@
+name: webview_app
+description: "A new Flutter project."
+# Prevent accidental publishing to pub.dev.
+publish_to: 'none'
+
+# Define the version and build number.
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.6 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  webview_flutter: ^3.0.0
+  flutter_lints: ^2.0.0
+  google_fonts: ^2.1.0
+  flutter_svg: ^2.0.9
+  shimmer: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/logo.png
+    - assets/images/search.png
+    - assets/images/moon.png
+
+  fonts:
+    - family: Tajawal
+      fonts:
+        - asset: assets/fonts/Tajawal-Medium.ttf
+          weight: 500
+
+# Uncomment and adjust the following section to add fonts or other Flutter-specific configurations.
+# fonts:
+#   - family: YourFontFamily
+#     fonts:
+#       - asset: fonts/YourFontFamily-Regular.ttf
+#       - asset: fonts/YourFontFamily-Italic.ttf
+#         style: italic
+#   - family: AnotherFontFamily
+#     fonts:
+#       - asset: fonts/AnotherFontFamily.ttf
+#       - asset: fonts/AnotherFontFamily-Bold.ttf
+#         weight: 700
