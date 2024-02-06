@@ -1,34 +1,13 @@
 workflows:
-  ios-workflow:
-    name: iOS Workflow
+  ios-app-workflow:
+    name: iOS Application
     environment:
-      vars:
-        XCODE_WORKSPACE: "Runner.xcworkspace" # specify the correct workspace name
-        XCODE_SCHEME: "Runner" # specify the correct scheme name
-        APP_STORE_CONNECT_ISSUER_ID: Encrypted(...) # Your App Store Connect Issuer ID
-        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(...) # Your App Store Connect Key ID
-        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(...) # Your App Store Connect Private Key
-        CERTIFICATE_PRIVATE_KEY: Encrypted(...) # Private key for your certificate
       flutter: stable
       xcode: latest
     scripts:
-      - name: Set up keychain to be used for code signing using Codemagic CLI 'keychain' command
-        script: keychain initialize
-      - name: Fetch signing files
-        script: |
-          app-store-connect fetch-signing-files "io.codemagic.app" --type IOS_APP_DEVELOPMENT --create
-          keychain add-certificates
       - name: Fetch dependencies
-        script: flutter packages pub get
-      - name: Build ipa for distribution
-        script: flutter build ios --release --no-codesign
-      - name: Set up signing certificate
-        script: |
-          keychain add-certificates
-          APP_PATH=$(find $CM_BUILD_DIR/build/ios/iphoneos -name "*.app" | head -1)
-          IPAPATH=$CM_BUILD_DIR/build/ios/ipa
-          mkdir -p $IPAPATH
-          xcode-project use-profiles
-          xcode-project build-ipa --project "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
+        script: flutter pub get
+      - name: Build IPA for simulator (not for real device)
+        script: flutter build ios --simulator --debug
     artifacts:
-      - $CM_BUILD_DIR/build/ios/ipa/*.ipa
+      - build/ios/iphonesimulator/*.app
