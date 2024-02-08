@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/services.dart';
+import 'dart:io';
+
 
 
 
@@ -36,10 +38,14 @@ class WebViewScreen extends StatefulWidget {
 class _WebViewScreenState extends State<WebViewScreen> {
   final String url = "https://noujoumart.com/";
   bool isLoading = true; // State variable for tracking loading state
+  bool isOffline = false;
+
 
   int _selectedIndex = 3;
   late WebViewController _controller;
   int _lastSelectedIndex = -1;
+  HttpServer? _localServer;
+  String? _localUrl;
 
 
 
@@ -53,103 +59,68 @@ class _WebViewScreenState extends State<WebViewScreen> {
       statusBarBrightness: Brightness.dark,
       // Set status bar content to dark
     ));
-
+    _checkConnectivity();
   }
 
+  void _checkConnectivity() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        setState(() {
+          isOffline = false;
+        });
+      }
+    } on SocketException catch(_) {
+      setState(() {
+        isOffline = true;
+      });
 
-  void _injectJavaScriptToHideSections() {
-    final String jsCode = """
-    var element = document.getElementById('sec_41_0');
-    if(element && element.classList.contains('qma-sec-innrs')) {
-        element.style.display = 'none';
     }
-    document.querySelectorAll('#sec_41_0 .qma-sec-innrs.row').forEach(function(child) {
-        child.style.display = 'none';
-    });
-    document.getElementById('sec_89_2').style.display = 'none';
-    document.getElementById('sec_14_3').style.display = 'none';
-    document.getElementById('sec_75_4').style.display = 'none';
-    document.getElementById('sec_68_5').style.display = 'none';
-    document.getElementById('sec_38_6').style.display = 'none';
-    document.getElementById('sec_11_7').style.display = 'none';
-    document.getElementById('sec_61_8').style.display = 'none';
+  }
+
+  void _injectJavaScriptToHideFooter() {
+    final String jsCode = """
     document.getElementById('qma-footer').style.display = 'none';
   """;
     _controller.runJavascript(jsCode);
   }
-
-  void _home() async {
-
-
-    // JavaScript code to manipulate the DOM as needed
+  void _hideSocialMediaButtons() {
     final String jsCode = """
-    var element = document.getElementById('sec_41_0');
-    if (element && element.classList.contains('qma-sec-innrs')) {
-      element.style.display = 'block';
+    var darkbDiv = document.querySelector('.darkb');
+    if (darkbDiv) {
+      darkbDiv.style.display = 'none';
     }
-    document.querySelectorAll('#sec_41_0 .qma-sec-innrs.row').forEach(function(child) {
-      child.style.display = 'block';
-    });
-    document.getElementById('sec_89_2').style.display = 'block';
-    document.getElementById('sec_14_3').style.display = 'block';
-    document.getElementById('sec_75_4').style.display = 'block';
-    document.getElementById('sec_68_5').style.display = 'block';
-    document.getElementById('sec_38_6').style.display = 'block';
-    document.getElementById('sec_11_7').style.display = 'block';
-    document.getElementById('sec_61_8').style.display = 'block';
-    document.getElementById('qma-footer').style.display = 'block';
-  """;
-
-    // Run the JavaScript code
-    if (jsCode.isNotEmpty) {
-      _controller.runJavascript(jsCode);
+    var socDiv = document.querySelector('.soc');
+    if (socDiv) {
+      socDiv.style.display = 'none';
     }
-  }
-
-
-  void _sport() {
-    final String jsCode = """
-    var element = document.getElementById('sec_41_0');
-    if(element && element.classList.contains('qma-sec-innrs')) {
-        element.style.display = 'none';
-    }
-    document.querySelectorAll('#sec_41_0 .qma-sec-innrs.row').forEach(function(child) {
-        child.style.display = 'none';
-    });
-    document.getElementById('sec_21_1').style.display = 'none';
-    document.getElementById('sec_75_4').style.display = 'none';
-    document.getElementById('sec_89_2').style.display = 'none';
-    document.getElementById('sec_68_5').style.display = 'none';
-    document.getElementById('sec_38_6').style.display = 'none';
-    document.getElementById('sec_11_7').style.display = 'none';
-    document.getElementById('sec_61_8').style.display = 'none';
-    document.getElementById('qma-footer').style.display = 'none';
-  """;
-    _controller.runJavascript(jsCode);
-  }
-  void _weather() {
-    final String jsCode = """
-    var element = document.getElementById('sec_41_0');
-    if(element && element.classList.contains('qma-sec-innrs')) {
-        element.style.display = 'none';
-    }
-    document.querySelectorAll('#sec_41_0 .qma-sec-innrs.row').forEach(function(child) {
-        child.style.display = 'none';
-    });
-    document.getElementById('sec_21_1').style.display = 'none';
-    document.getElementById('sec_75_4').style.display = 'none';
-    document.getElementById('sec_89_2').style.display = 'none';
-    document.getElementById('sec_14_3').style.display = 'none';
-    document.getElementById('sec_38_6').style.display = 'none';
-    document.getElementById('ap_widget_top-2').style.display = 'none';
-    document.getElementById('block_21_5').style.display = 'none';
-    document.getElementById('sec_11_7').style.display = 'none';
-    document.getElementById('sec_61_8').style.display = 'none';
-    document.getElementById('qma-footer').style.display = 'none';
   """;
     _controller.runJavascript(jsCode);
   }
 
+  void _hideDarkModeButton() {
+    final String jsCode = """
+    var darkbDiv = document.querySelector('.darkb');
+    if (darkbDiv) {
+      darkbDiv.style.display = 'none';
+    }
+  """;
+    final String jsCode2 = """
+    var darkbDiv = document.querySelector('.soc');
+    if (soc) {
+      soc.style.display = 'none';
+    }
+  """;
+    _controller.runJavascript(jsCode);
+    _controller.runJavascript(jsCode2);
+
+  }
+  void _injectJavaScriptToHideSearchDiv() {
+    final String jsCode = """
+    document.querySelector('.h-search').style.display = 'none';
+  """;
+    _controller.runJavascript(jsCode);
+  }
 
 
   void _onItemTapped(int index) async {
@@ -229,6 +200,24 @@ class _WebViewScreenState extends State<WebViewScreen> {
   @override
   Widget build(BuildContext context) {
     final double topPadding = MediaQuery.of(context).padding.top;
+    final String customCss = """
+    <style>
+      #comp_73_6.h-logo {
+        height: 40px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        padding-left: 100px;
+        padding-right: 100px;
+      }
+
+      .mobile-innr {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+  """;
 
     return Scaffold(
       body: Stack(
@@ -250,7 +239,41 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 setState(() {
                   isLoading = false;
                 });
+
+                // Inject the custom CSS styles into the loaded page
+                final String customCss = """
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = \`
+      #comp_73_6.h-logo {
+        height: 40px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        padding-left: 100px;
+        padding-right: 100px;
+      }
+      .mobile-innr {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    \`;
+    document.head.appendChild(style);
+  """;
+
+                // Inject the CSS into the webpage
+                _controller.runJavascript(customCss).then((result) {
+                  print('Custom CSS injected successfully.');
+                }).catchError((error) {
+                  print('Error injecting custom CSS: $error');
+                });
+                _injectJavaScriptToHideFooter();
+                _injectJavaScriptToHideArrowIcon();
+                _injectJavaScriptToHideSearchDiv();
+                _hideSocialMediaButtons();
                 _handlePageFinished(url);
+                _hideDarkModeButton();
               },
               onWebResourceError: (WebResourceError error) {
                 print("Web resource loading error: ${error.description}");
@@ -277,6 +300,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
         ],
       ),
     );
+  }
+  void _injectJavaScriptToHideArrowIcon() {
+    final String jsCode = """
+    document.querySelector('.ri-arrow-up-circle-fill').style.display = 'none';
+  """;
+    _controller.runJavascript(jsCode);
   }
 
 
